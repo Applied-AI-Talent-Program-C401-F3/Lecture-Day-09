@@ -17,7 +17,7 @@ Tôi chịu trách nhiệm triển khai "bộ não" điều hướng của hệ 
 - Functions tôi implement: `supervisor_node`, `route_decision`, `human_review_node`.
 
 **Cách công việc của tôi kết nối với phần của thành viên khác:**
-Tôi nhận task từ cấu trúc `AgentState` mà A thiết kế, sau đó phân tích và ra quyết định định tuyến. Kết quả định tuyến của tôi sẽ quyết định xem C hay D sẽ là người thực thi tiếp theo. Ngoài ra, nếu tôi phát hiện rủi ro cao, tôi sẽ chuyển hướng qua node "Human Review" trước khi cho phép C tiếp tục tổng hợp dữ liệu.
+Tôi nhận task từ cấu trúc `AgentState` mà Khương Hải Lâm thiết kế, sau đó phân tích và ra quyết định định tuyến. Kết quả định tuyến của tôi sẽ quyết định xem Thái Doãn Minh Hải hay Đặng Tuấn Anh sẽ là người thực thi tiếp theo. Ngoài ra, nếu tôi phát hiện rủi ro cao, tôi sẽ chuyển hướng qua node "Human Review" trước khi cho phép Thái Doãn Minh Hải tiếp tục tổng hợp dữ liệu.
 
 **Bằng chứng (commit hash, file có comment tên bạn, v.v.):**
 Tôi đã thiết lập logic keyword classification trong hàm `supervisor_node` với các tập hợp `policy_keywords` và `risk_keywords`.
@@ -76,10 +76,10 @@ Tôi đã xây dựng được một hệ thống routing minh bạch. Thông qu
 Hệ thống của tôi vẫn phụ thuộc vào từ khóa cứng. Nếu người dùng dùng thuật ngữ quá xa lạ, hệ thống sẽ rơi vào route mặc định.
 
 **Nhóm phụ thuộc vào tôi ở đâu?**
-Nếu supervisor không hoạt động, các worker chuyên biệt như `policy_tool_worker` của D sẽ không bao giờ được gọi, làm lãng phí toàn bộ nỗ lực xây dựng công cụ của nhóm.
+Nếu supervisor không hoạt động, các worker chuyên biệt như `policy_tool_worker` của Đặng Tuấn Anh sẽ không bao giờ được gọi, làm lãng phí toàn bộ nỗ lực xây dựng công cụ của nhóm.
 
 **Phần tôi phụ thuộc vào thành viên khác:**
-Tôi phụ thuộc vào A để đảm bảo graph flow có thể quay lại worker sau khi HITL kết thúc.
+Tôi phụ thuộc vào Khương Hải Lâm để đảm bảo graph flow có thể quay lại worker sau khi HITL kết thúc.
 
 ---
 
