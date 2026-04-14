@@ -15,7 +15,7 @@ Tôi chịu trách nhiệm về `policy_tool_worker`, đây là worker chuyên b
 - Functions tôi implement: `analyze_policy`, `run`, và định nghĩa các logic ngoại lệ cho chính sách (exceptions).
 
 **Cách công việc của tôi kết nối với phần của thành viên khác:**
-Tôi nhận các task mà Supervisor (B) định nghĩa là liên quan đến chính sách. Để hoàn thành task, tôi sử dụng context mà `retrieval_worker` (C) đã lấy về, hoặc tự gọi MCP tool `search_kb` thông qua MCP Client (E). Kết quả phân tích chính sách của tôi là đầu vào quan trọng để synthesis worker của C tạo ra câu trả lời chính xác cho người dùng.
+Tôi nhận các task mà Supervisor định nghĩa là liên quan đến chính sách. Để hoàn thành task, tôi sử dụng context mà `retrieval_worker` đã lấy về, hoặc tự gọi MCP tool `search_kb` thông qua MCP Client. Kết quả phân tích chính sách của tôi là đầu vào quan trọng để synthesis worker tạo ra câu trả lời chính xác cho người dùng.
 
 **Bằng chứng (commit hash, file có comment tên bạn, v.v.):**
 Tôi đã hoàn thiện hàm `analyze_policy` với các bộ quy tắc rule-based cho Flash Sale, Digital products, và Activated products.
