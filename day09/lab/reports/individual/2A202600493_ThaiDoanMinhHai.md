@@ -1,8 +1,8 @@
 # Báo Cáo Cá Nhân — Lab Day 09: Multi-Agent Orchestration
 
 **Họ và tên:** Thái Doãn Minh Hải
-**Vai trò trong nhóm:** Worker Owner (Retrieval & Synthesis)  
-**Ngày nộp:** 14-04-2026  
+**Vai trò trong nhóm:** Worker Owner (Retrieval & Synthesis)
+**Ngày nộp:** 14-04-2026
 **Độ dài yêu cầu:** 500–800 từ
 
 ---
@@ -13,11 +13,11 @@ Tôi chịu trách nhiệm về luồng dữ liệu chính của hệ thống, t
 
 **Module/file tôi chịu trách nhiệm:**
 
-- File chính: `day09/lab/workers/retrieval.py` và `day09/lab/workers/synthesis.py`.
-- Functions tôi implement: `retrieve_dense`, `synthesize`, `_estimate_confidence`, `_call_llm`.
+* File chính: `day09/lab/workers/retrieval.py` và `day09/lab/workers/synthesis.py`.
+* Functions tôi implement: `retrieve_dense`, `synthesize`, `_estimate_confidence`, `_call_llm`.
 
 **Cách công việc của tôi kết nối với phần của thành viên khác:**
-Tôi nhận task từ `graph.py` của Lâm và routing intent từ Bảo. Tôi cũng phối hợp với Hùng để `retrieval_worker` của tôi có thể được gọi thông qua MCP tool `search_kb`. Cuối cùng, tôi nhận thêm các ngoại lệ (exceptions) từ D để đưa vào `synthesis_worker` nhằm tạo ra câu trả lời chính xác và đầy đủ nhất.
+Tôi nhận task từ `graph.py` của Lâm và routing intent từ Bảo. Tôi cũng phối hợp với Kiên để `retrieval_worker` của tôi có thể được gọi thông qua MCP tool `search_kb`. Cuối cùng, tôi nhận thêm các ngoại lệ (exceptions) từ Anh để đưa vào `synthesis_worker` nhằm tạo ra câu trả lời chính xác và đầy đủ nhất.
 
 **Bằng chứng (commit hash, file có comment tên bạn, v.v.):**
 Tôi đã cấu hình lại `_get_collection()` trong `retrieval.py` để trỏ đúng vào collection `rag_lab` từ Day 08.
@@ -61,8 +61,8 @@ Tôi đã cập nhật file `.env` và hàm `_get_collection()` để sử dụn
 
 **Bằng chứng trước/sau:**
 
-- Trước: `Retrieved: 0 chunks`
-- Sau: `Retrieved: 3 chunks from ['support/sla-p1-2026.pdf', ...]`
+* Trước: `Retrieved: 0 chunks`
+* Sau: `Retrieved: 3 chunks from ['support/sla-p1-2026.pdf', ...]`
 
 ---
 
@@ -78,7 +78,7 @@ Hàm `_estimate_confidence` của tôi còn khá đơn giản, chủ yếu dựa
 Tôi là chặng cuối của pipeline. Nếu `synthesis_worker` của tôi gặp lỗi, user sẽ không nhận được bất kỳ phản hồi nào, bất kể các bước supervisor hay retrieval trước đó có tốt đến đâu.
 
 **Phần tôi phụ thuộc vào thành viên khác:**
-Tôi phụ thuộc vào D để có được các "Policy Exceptions" chính xác. Nếu D không liệt kê được ngoại lệ Flash Sale, tôi sẽ trả lời sai cho khách hàng.
+Tôi phụ thuộc vào Anh để có được các "Policy Exceptions" chính xác. Nếu không liệt kê được ngoại lệ Flash Sale, hệ thống sẽ trả lời sai cho khách hàng.
 
 ---
 
