@@ -23,14 +23,15 @@ load_dotenv()
 
 WORKER_NAME = "synthesis_worker"
 
-SYSTEM_PROMPT = """Bạn là trợ lý IT Helpdesk nội bộ.
+SYSTEM_PROMPT = """Bạn là trợ lý IT Helpdesk nội bộ chuyên nghiệp.
 
 Quy tắc nghiêm ngặt:
 1. CHỈ trả lời dựa vào context được cung cấp. KHÔNG dùng kiến thức ngoài.
-2. Nếu context không đủ để trả lời → nói rõ "Không đủ thông tin trong tài liệu nội bộ".
-3. Trích dẫn nguồn cuối mỗi câu quan trọng: [tên_file].
-4. Trả lời súc tích, có cấu trúc. Không dài dòng.
-5. Nếu có exceptions/ngoại lệ → nêu rõ ràng trước khi kết luận.
+2. PHẢI liệt kê ĐẦY ĐỦ các chi tiết kỹ thuật (ví dụ: liệt kê tất cả các kênh thông báo, tất cả các bước, tất cả các mốc thời gian).
+3. PHẢI giữ nguyên tên các chức danh/vai trò (ví dụ: "Line Manager", "IT Admin"). KHÔNG được tự ý thay thế bằng từ đồng nghĩa (như "Tech Lead").
+4. Nếu có mâu thuẫn giữa tài liệu cũ và quy tắc mới từ Policy Tool -> Ưu tiên quy tắc mới nhất.
+5. Nếu context không đủ để trả lời -> nói rõ "Không đủ thông tin trong tài liệu nội bộ".
+6. Trích dẫn nguồn cuối mỗi câu quan trọng: [tên_file].
 """
 
 
@@ -80,10 +81,22 @@ def _build_context(chunks: list, policy_result: dict) -> str:
             score = chunk.get("score", 0)
             parts.append(f"[{i}] Nguồn: {source} (relevance: {score:.2f})\n{text}")
 
-    if policy_result and policy_result.get("exceptions_found"):
-        parts.append("\n=== POLICY EXCEPTIONS ===")
-        for ex in policy_result["exceptions_found"]:
-            parts.append(f"- {ex.get('rule', '')}")
+    if policy_result:
+        if policy_result.get("exceptions_found"):
+            parts.append("\n=== POLICY EXCEPTIONS & LOGIC ===")
+            for ex in policy_result["exceptions_found"]:
+                parts.append(f"- {ex.get('rule', '')}")
+        
+        if policy_result.get("policy_version_note"):
+            parts.append(f"\nLƯU Ý PHIÊN BẢN: {policy_result['policy_version_note']}")
+
+        if policy_result.get("access_details"):
+            ad = policy_result["access_details"]
+            parts.append("\n=== MCP ACCESS CONTROL DATA ===")
+            parts.append(f"- Cấp quyền: {'CÓ THỂ' if ad.get('can_grant') else 'KHÔNG THỂ'}")
+            parts.append(f"- Người phê duyệt bắt buộc: {', '.join(ad.get('required_approvers', []))}")
+            if ad.get("notes"):
+                parts.append(f"- Ghi chú quan trọng: {' '.join(ad.get('notes', []))}")
 
     if not parts:
         return "(Không có context)"

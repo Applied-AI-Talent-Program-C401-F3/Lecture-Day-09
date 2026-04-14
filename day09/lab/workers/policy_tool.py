@@ -114,25 +114,20 @@ def analyze_policy(task: str, chunks: list) -> dict:
     policy_applies = len(exceptions_found) == 0
 
     # Determine which policy version applies (temporal scoping)
-    # TODO: Check nếu đơn hàng trước 01/02/2026 → v3 applies (không có docs, nên flag cho synthesis)
     policy_name = "refund_policy_v4"
     policy_version_note = ""
-    if "31/01" in task_lower or "30/01" in task_lower or "trước 01/02" in task_lower:
-        policy_version_note = "Đơn hàng đặt trước 01/02/2026 áp dụng chính sách v3 (không có trong tài liệu hiện tại)."
+    is_v3_order = any(kw in task_lower for kw in ["31/01", "30/01", "trước 01/02", "trước tháng 2"])
+    
+    if is_v3_order:
+        policy_applies = False
+        policy_version_note = "Đơn hàng đặt trước 01/02/2026 áp dụng chính sách v3 (không có trong tài liệu hiện tại). KHÔNG ĐƯỢC áp dụng quy tắc của v4."
+        exceptions_found.append({
+            "type": "temporal_scope_exception",
+            "rule": "Chính sách v4 chỉ áp dụng cho đơn hàng từ 01/02/2026. Đơn hàng cũ cần tra cứu chính sách v3 manual.",
+            "source": "system_logic",
+        })
 
-    # TODO Sprint 2: Gọi LLM để phân tích phức tạp hơn
-    # Ví dụ:
-    # from openai import OpenAI
-    # client = OpenAI()
-    # response = client.chat.completions.create(
-    #     model="gpt-4o-mini",
-    #     messages=[
-    #         {"role": "system", "content": "Bạn là policy analyst. Dựa vào context, xác định policy áp dụng và các exceptions."},
-    #         {"role": "user", "content": f"Task: {task}\n\nContext:\n" + "\n".join([c['text'] for c in chunks])}
-    #     ]
-    # )
-    # analysis = response.choices[0].message.content
-
+    # ... rest of analysis ...
     sources = list({c.get("source", "unknown") for c in chunks if c})
 
     return {
@@ -141,7 +136,7 @@ def analyze_policy(task: str, chunks: list) -> dict:
         "exceptions_found": exceptions_found,
         "source": sources,
         "policy_version_note": policy_version_note,
-        "explanation": "Analyzed via rule-based policy check. TODO: upgrade to LLM-based analysis.",
+        "explanation": "Analyzed via rule-based policy check. Temporal scoping applied.",
     }
 
 
@@ -191,8 +186,27 @@ def run(state: dict) -> dict:
                 chunks = mcp_result["output"]["chunks"]
                 state["retrieved_chunks"] = chunks
 
-        # Step 2: Phân tích policy
+        # Step 2: Nếu hỏi về access level, gọi MCP check_access_permission
+        import re
+        level_match = re.search(r"level\s*(\d)", task.lower())
+        if level_match and needs_tool:
+            level = int(level_match.group(1))
+            mcp_result = _call_mcp_tool("check_access_permission", {
+                "access_level": level,
+                "requester_role": "user",  # Default role
+                "is_emergency": "emergency" in task.lower() or "khẩn cấp" in task.lower()
+            })
+            state["mcp_tools_used"].append(mcp_result)
+            state["history"].append(f"[{WORKER_NAME}] called MCP check_access_permission for Level {level}")
+
+        # Step 3: Phân tích policy
         policy_result = analyze_policy(task, chunks)
+        
+        # Nếu có kết quả từ check_access_permission, merge vào policy_result
+        for tool_call in state["mcp_tools_used"]:
+            if tool_call["tool"] == "check_access_permission" and tool_call["output"]:
+                policy_result["access_details"] = tool_call["output"]
+
         state["policy_result"] = policy_result
 
         # Step 3: Nếu cần thêm info từ MCP (e.g., ticket status), gọi get_ticket_info
